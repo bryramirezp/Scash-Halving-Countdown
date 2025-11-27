@@ -5,7 +5,7 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  // site: 'https://tu-dominio.com', // Descomentar y configurar cuando tengas el dominio
+  site: 'https://scash-halving-countdown.vercel.app',
   integrations: [
     tailwind(),
     sitemap()
