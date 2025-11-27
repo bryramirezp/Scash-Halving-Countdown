@@ -1,10 +1,11 @@
 ---
+import { Image } from 'astro:assets';
 import logo from '../assets/logo.png';
 ---
 
 <header class="w-full px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between relative">
   <div class="flex items-center gap-2 sm:gap-3">
-    <img src={logo.src} alt="Scash Logo" class="w-8 h-8 sm:w-10 sm:h-10" />
+    <Image src={logo} alt="Scash Logo" class="w-8 h-8 sm:w-10 sm:h-10" width={40} height={40} />
     <span class="text-xl sm:text-2xl font-bold text-scash-purple">Scash</span>
   </div>
   
