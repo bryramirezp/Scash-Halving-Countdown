@@ -1,0 +1,37 @@
+---
+interface Props {
+  initialTimeRemaining?: number; // en segundos
+}
+
+const { initialTimeRemaining = 0 } = Astro.props;
+---
+
+<div id="countdown-timer" class="flex gap-2 sm:gap-4 md:gap-6 lg:gap-8 justify-center items-center flex-wrap" data-initial-seconds={initialTimeRemaining}>
+  <div class="flex flex-col items-center min-w-[60px] sm:min-w-[70px] md:min-w-[90px] lg:min-w-[110px]">
+    <div class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-7xl font-bold text-scash-purple" id="days">000</div>
+    <div class="text-xs sm:text-sm md:text-base text-gray-600 mt-1 sm:mt-2">DAYS</div>
+  </div>
+  <div class="flex flex-col items-center min-w-[50px] sm:min-w-[60px] md:min-w-[80px] lg:min-w-[100px]">
+    <div class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-7xl font-bold text-scash-purple" id="hours">00</div>
+    <div class="text-xs sm:text-sm md:text-base text-gray-600 mt-1 sm:mt-2">HRS</div>
+  </div>
+  <div class="flex flex-col items-center min-w-[50px] sm:min-w-[60px] md:min-w-[80px] lg:min-w-[100px]">
+    <div class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-7xl font-bold text-scash-purple" id="minutes">00</div>
+    <div class="text-xs sm:text-sm md:text-base text-gray-600 mt-1 sm:mt-2">MIN</div>
+  </div>
+  <div class="flex flex-col items-center min-w-[50px] sm:min-w-[60px] md:min-w-[80px] lg:min-w-[100px]">
+    <div class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-7xl font-bold text-scash-purple" id="seconds">00</div>
+    <div class="text-xs sm:text-sm md:text-base text-gray-600 mt-1 sm:mt-2">SEC</div>
+  </div>
+</div>
+
+<script>
+  import { initCountdown } from '../scripts/countdown-client';
+  
+  const timerElement = document.getElementById('countdown-timer');
+  if (timerElement) {
+    const initialSeconds = parseInt(timerElement.getAttribute('data-initial-seconds') || '0', 10);
+    initCountdown(initialSeconds);
+  }
+</script>
+
