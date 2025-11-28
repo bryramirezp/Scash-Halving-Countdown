@@ -16,17 +16,22 @@ export async function getBlockCount(): Promise<number> {
   const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
   
   try {
+    const timestamp = Date.now();
     const apiUrl = typeof window === 'undefined'
-      ? 'https://scash.tv/api/getblockcount'
-      : `/api/getblockcount?t=${Date.now()}`;
+      ? `https://scash.tv/api/getblockcount?t=${timestamp}&_=${Math.random()}`
+      : `/api/getblockcount?t=${timestamp}&_=${Math.random()}`;
     
     const response = await fetch(apiUrl, {
+      method: 'GET',
       headers: {
         'Accept': 'application/json',
-        'Cache-Control': 'no-cache',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
       },
       signal: controller.signal,
       cache: 'no-store',
+      credentials: 'omit',
     });
     
     clearTimeout(timeoutId);

@@ -9,11 +9,17 @@ export const GET: APIRoute = async () => {
   const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
 
   try {
-    const response = await fetch(`${API_BASE}/api/getblockcount`, {
+    const timestamp = Date.now();
+    const response = await fetch(`${API_BASE}/api/getblockcount?t=${timestamp}&_=${Math.random()}`, {
+      method: 'GET',
       headers: {
         'Accept': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
       },
       signal: controller.signal,
+      cache: 'no-store',
     });
 
     clearTimeout(timeoutId);

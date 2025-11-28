@@ -40,14 +40,21 @@ function updateDisplay(seconds: number) {
 
 async function refreshBlockData() {
   try {
+    secureLog('Refreshing block data...');
     const currentBlock = await getBlockCount();
+    secureLog(`Block count fetched: ${currentBlock}`);
+    
     const halvingData = calculateHalvingData(currentBlock);
     
     const currentBlockEl = document.getElementById('current-block');
     const nextHalvingDateEl = document.getElementById('next-halving-date');
     
     if (currentBlockEl) {
+      const oldValue = currentBlockEl.textContent;
       currentBlockEl.textContent = currentBlock.toLocaleString();
+      secureLog(`Block count updated: ${oldValue} -> ${currentBlockEl.textContent}`);
+    } else {
+      secureLog('Warning: current-block element not found');
     }
     
     if (nextHalvingDateEl) {
@@ -61,12 +68,15 @@ async function refreshBlockData() {
     retryCount = 0;
   } catch (error) {
     retryCount++;
+    secureLog(`Error refreshing block data (attempt ${retryCount}/${MAX_RETRIES})`, error);
+    
     if (retryCount < MAX_RETRIES) {
       const delay = BASE_DELAY * Math.pow(2, retryCount - 1);
-      secureLog(`Error refreshing block data, retrying in ${delay}ms (attempt ${retryCount}/${MAX_RETRIES})`, error);
+      secureLog(`Retrying in ${delay}ms...`);
       setTimeout(() => refreshBlockData(), delay);
     } else {
-      secureLog('Max retries reached for block data refresh', error);
+      secureLog('Max retries reached for block data refresh. Will retry on next interval.', error);
+      retryCount = 0;
     }
   }
 }
