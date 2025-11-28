@@ -1,14 +1,17 @@
 ---
+import { getFirstHalvingDate } from '../lib/constants';
+
 interface Props {
-  nextHalvingDate?: Date | string; // fecha absoluta del próximo halving
+  nextHalvingDate?: Date | string;
 }
 
 const { nextHalvingDate } = Astro.props;
-const halvingTimestamp = nextHalvingDate instanceof Date 
-  ? nextHalvingDate.getTime() 
+const halvingDate = nextHalvingDate instanceof Date 
+  ? nextHalvingDate 
   : nextHalvingDate 
-    ? new Date(nextHalvingDate).getTime() 
-    : Date.now() + (210000 * 600 * 1000);
+    ? new Date(nextHalvingDate) 
+    : getFirstHalvingDate();
+const halvingTimestamp = halvingDate.getTime();
 ---
 
 <div id="countdown-timer" class="flex gap-2 sm:gap-4 md:gap-6 lg:gap-8 justify-center items-center flex-wrap" data-halving-timestamp={halvingTimestamp}>

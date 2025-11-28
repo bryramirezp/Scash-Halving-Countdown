@@ -1,9 +1,11 @@
 ---
 import CountdownTimer from './CountdownTimer.astro';
 import { getBlockCount, calculateHalvingData, type HalvingData } from '../lib/api';
+import { getFirstHalvingDate } from '../lib/constants';
 
 let currentBlock = 0;
 let halvingData: HalvingData;
+const firstHalvingDate = getFirstHalvingDate();
 
 try {
   currentBlock = await getBlockCount();
@@ -22,7 +24,7 @@ try {
   
   <div class="mb-6 sm:mb-8 md:mb-10">
     <CountdownTimer 
-      nextHalvingDate={halvingData.nextHalvingDate}
+      nextHalvingDate={firstHalvingDate}
     />
   </div>
   
@@ -50,7 +52,7 @@ try {
       <div class="min-w-0 flex-1">
         <div class="text-xs sm:text-sm text-gray-600 mb-1">NEXT HALVING DATE (Approx.)</div>
         <div id="next-halving-date" class="text-xl sm:text-2xl font-bold text-gray-900 break-words">
-          {halvingData.nextHalvingDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+          {firstHalvingDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
         </div>
         <div class="text-xs text-gray-500 mt-1 break-words">
           (Block {halvingData.nextHalvingBlock.toLocaleString()})

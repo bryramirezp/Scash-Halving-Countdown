@@ -1,4 +1,4 @@
-import { HALVING_INTERVAL, BLOCK_TIME_SECONDS } from './constants';
+import { HALVING_INTERVAL, BLOCK_TIME_SECONDS, calculateHalvingDate } from './constants';
 import { secureLog, validateNumber } from './security';
 
 export interface HalvingData {
@@ -78,8 +78,14 @@ export async function getBlockCount(): Promise<number> {
 export function calculateHalvingData(currentBlock: number): HalvingData {
   const nextHalvingBlock = Math.ceil(currentBlock / HALVING_INTERVAL) * HALVING_INTERVAL;
   const blocksRemaining = nextHalvingBlock - currentBlock;
-  const timeRemaining = blocksRemaining * BLOCK_TIME_SECONDS;
-  const nextHalvingDate = new Date(Date.now() + timeRemaining * 1000);
+  
+  // Calcular fecha del halving de forma estable basándonos en el genesis block
+  const nextHalvingDate = calculateHalvingDate(nextHalvingBlock);
+  
+  // Calcular tiempo restante basándonos en la fecha absoluta del halving
+  const now = Date.now();
+  const halvingTimestamp = nextHalvingDate.getTime();
+  const timeRemaining = Math.max(0, Math.floor((halvingTimestamp - now) / 1000));
   
   return {
     currentBlock,

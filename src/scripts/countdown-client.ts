@@ -1,5 +1,5 @@
 import { getBlockCount, calculateHalvingData } from '../lib/api';
-import { BLOCK_REFRESH_INTERVAL, BLOCK_TIME_SECONDS } from '../lib/constants';
+import { BLOCK_REFRESH_INTERVAL, getFirstHalvingDate } from '../lib/constants';
 import { secureLog } from '../lib/security';
 
 let targetHalvingTimestamp = 0;
@@ -38,7 +38,7 @@ function updateDisplay(seconds: number) {
   if (secondsEl) secondsEl.textContent = String(secs).padStart(2, '0');
 }
 
-async function refreshBlockData(updateHalvingDate: boolean = false) {
+async function refreshBlockData() {
   try {
     const currentBlock = await getBlockCount();
     const halvingData = calculateHalvingData(currentBlock);
@@ -51,17 +51,11 @@ async function refreshBlockData(updateHalvingDate: boolean = false) {
     }
     
     if (nextHalvingDateEl) {
-      nextHalvingDateEl.textContent = halvingData.nextHalvingDate.toLocaleDateString('en-US', {
+      const stableHalvingDate = getFirstHalvingDate();
+      nextHalvingDateEl.textContent = stableHalvingDate.toLocaleDateString('en-US', {
         month: 'long',
         year: 'numeric'
       });
-    }
-    
-    if (updateHalvingDate) {
-      const newHalvingTimestamp = halvingData.nextHalvingDate.getTime();
-      if (newHalvingTimestamp !== targetHalvingTimestamp) {
-        targetHalvingTimestamp = newHalvingTimestamp;
-      }
     }
     
     retryCount = 0;
@@ -70,7 +64,7 @@ async function refreshBlockData(updateHalvingDate: boolean = false) {
     if (retryCount < MAX_RETRIES) {
       const delay = BASE_DELAY * Math.pow(2, retryCount - 1);
       secureLog(`Error refreshing block data, retrying in ${delay}ms (attempt ${retryCount}/${MAX_RETRIES})`, error);
-      setTimeout(() => refreshBlockData(updateHalvingDate), delay);
+      setTimeout(() => refreshBlockData(), delay);
     } else {
       secureLog('Max retries reached for block data refresh', error);
     }
@@ -93,16 +87,16 @@ export function initCountdown(initialSeconds: number, halvingTimestamp: number) 
       if (countdownInterval) {
         clearInterval(countdownInterval);
       }
-      refreshBlockData(true);
+      refreshBlockData();
     }
   }, 1000);
   
   blockRefreshInterval = window.setInterval(() => {
-    refreshBlockData(true);
+    refreshBlockData();
   }, BLOCK_REFRESH_INTERVAL);
   
   setTimeout(() => {
-    refreshBlockData(false);
+    refreshBlockData();
   }, 2000);
 }
 
