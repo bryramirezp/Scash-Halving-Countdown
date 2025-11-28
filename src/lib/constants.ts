@@ -10,7 +10,7 @@ export const API_BASE = import.meta.env.PROD
   ? API_BASE_RAW.replace(/^http:/, 'https:')
   : API_BASE_RAW;
 
-export const BLOCK_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutos en milisegundos
+export const BLOCK_REFRESH_INTERVAL = 1 * 60 * 1000; // 1 minuto en milisegundos
 
 export function calculateHalvingDate(halvingBlockNumber: number): Date {
   const blocksFromGenesis = halvingBlockNumber;
