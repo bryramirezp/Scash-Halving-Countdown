@@ -2,6 +2,8 @@ import type { APIRoute } from 'astro';
 import { API_BASE } from '../../lib/constants';
 import { validateNumber } from '../../lib/security';
 
+export const prerender = false;
+
 const FETCH_TIMEOUT = 10000;
 
 export const GET: APIRoute = async () => {
@@ -61,4 +63,3 @@ export const GET: APIRoute = async () => {
     );
   }
 };
-
