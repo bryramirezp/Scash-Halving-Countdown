@@ -18,13 +18,15 @@ export async function getBlockCount(): Promise<number> {
   try {
     const apiUrl = typeof window === 'undefined'
       ? 'https://scash.tv/api/getblockcount'
-      : '/api/getblockcount';
+      : `/api/getblockcount?t=${Date.now()}`;
     
     const response = await fetch(apiUrl, {
       headers: {
         'Accept': 'application/json',
+        'Cache-Control': 'no-cache',
       },
       signal: controller.signal,
+      cache: 'no-store',
     });
     
     clearTimeout(timeoutId);
