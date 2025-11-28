@@ -6,7 +6,7 @@ Uses the Scash API (`scash.tv/api/getblockcount`) to fetch the current block cou
 
 ---
 
-**Donations:** `scash1qv79hg8dxc8gmsa4q07pvxwhkfzhqle7fy7q5py` (to help buy a domain)
+**Donations:** `scash1qerwnad7xslg45u8msfg8756xmk59ekry25fz2p` (to help buy a domain)
 
 ---
 
