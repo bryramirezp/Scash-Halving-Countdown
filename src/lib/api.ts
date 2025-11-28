@@ -1,4 +1,4 @@
-import { API_BASE, HALVING_INTERVAL, BLOCK_TIME_SECONDS } from './constants';
+import { HALVING_INTERVAL, BLOCK_TIME_SECONDS } from './constants';
 import { secureLog, validateNumber } from './security';
 
 export interface HalvingData {
@@ -16,7 +16,11 @@ export async function getBlockCount(): Promise<number> {
   const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
   
   try {
-    const response = await fetch(`${API_BASE}/api/getblockcount`, {
+    const apiUrl = typeof window === 'undefined'
+      ? 'https://scash.tv/api/getblockcount'
+      : '/api/getblockcount';
+    
+    const response = await fetch(apiUrl, {
       headers: {
         'Accept': 'application/json',
       },
@@ -26,10 +30,19 @@ export async function getBlockCount(): Promise<number> {
     clearTimeout(timeoutId);
     
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorMessage = `HTTP error! status: ${response.status} ${response.statusText}`;
+      secureLog(`Error fetching block count: ${errorMessage}`);
+      throw new Error(errorMessage);
     }
     
-    const data = await response.json();
+    let data;
+    try {
+      data = await response.json();
+    } catch (jsonError) {
+      const text = await response.text();
+      secureLog(`Error parsing JSON response. Response text: ${text.substring(0, 100)}`, jsonError);
+      throw new Error('Invalid JSON response from API');
+    }
     
     const blockCount = validateNumber(data, 0, Number.MAX_SAFE_INTEGER);
     
@@ -37,9 +50,24 @@ export async function getBlockCount(): Promise<number> {
   } catch (error) {
     clearTimeout(timeoutId);
     
-    if (error instanceof Error && error.name === 'AbortError') {
-      secureLog('Error fetching block count: Request timeout');
-      throw new Error('Request timeout');
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        secureLog('Error fetching block count: Request timeout');
+        throw new Error('Request timeout');
+      }
+      
+      const errorMsg = error.message.toLowerCase();
+      if (errorMsg.includes('failed to fetch') || 
+          errorMsg.includes('networkerror') ||
+          errorMsg.includes('network request failed') ||
+          errorMsg.includes('cors')) {
+        secureLog('Error fetching block count: Network/CORS error - unable to connect to API', error);
+        throw new Error('Network error: Unable to connect to API. Please check CORS settings.');
+      }
+      
+      if (errorMsg.includes('json')) {
+        throw error;
+      }
     }
     
     secureLog('Error fetching block count', error);

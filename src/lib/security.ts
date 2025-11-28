@@ -9,6 +9,12 @@ export function secureLog(message: string, error?: unknown): void {
     console.error(message);
     if (error instanceof Error) {
       console.error('Error type:', error.name);
+      console.error('Error message:', error.message);
+      if (error.cause) {
+        console.error('Error cause:', error.cause);
+      }
+    } else if (error) {
+      console.error('Error details:', String(error));
     }
   }
 }

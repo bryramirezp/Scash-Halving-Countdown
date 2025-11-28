@@ -21,7 +21,9 @@ try {
   </h1>
   
   <div class="mb-6 sm:mb-8 md:mb-10">
-    <CountdownTimer initialTimeRemaining={halvingData.timeRemaining} />
+    <CountdownTimer 
+      nextHalvingDate={halvingData.nextHalvingDate}
+    />
   </div>
   
   <div class="grid sm:grid-cols-2 gap-4 sm:gap-6">

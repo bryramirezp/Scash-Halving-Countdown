@@ -2,12 +2,20 @@ import { getBlockCount, calculateHalvingData } from '../lib/api';
 import { BLOCK_REFRESH_INTERVAL, BLOCK_TIME_SECONDS } from '../lib/constants';
 import { secureLog } from '../lib/security';
 
-let currentTimeRemaining = 0;
+let targetHalvingTimestamp = 0;
 let countdownInterval: number | null = null;
 let blockRefreshInterval: number | null = null;
 let retryCount = 0;
 const MAX_RETRIES = 3;
 const BASE_DELAY = 5000; // 5 segundos
+
+function calculateTimeRemaining(): number {
+  if (targetHalvingTimestamp <= 0) {
+    return 0;
+  }
+  const now = Date.now();
+  return Math.max(0, Math.floor((targetHalvingTimestamp - now) / 1000));
+}
 
 function updateDisplay(seconds: number) {
   if (typeof seconds !== 'number' || isNaN(seconds) || seconds < 0 || !isFinite(seconds)) {
@@ -30,13 +38,10 @@ function updateDisplay(seconds: number) {
   if (secondsEl) secondsEl.textContent = String(secs).padStart(2, '0');
 }
 
-async function refreshBlockData() {
+async function refreshBlockData(updateHalvingDate: boolean = false) {
   try {
     const currentBlock = await getBlockCount();
     const halvingData = calculateHalvingData(currentBlock);
-    currentTimeRemaining = halvingData.timeRemaining;
-    
-    retryCount = 0;
     
     const currentBlockEl = document.getElementById('current-block');
     const nextHalvingDateEl = document.getElementById('next-halving-date');
@@ -51,49 +56,54 @@ async function refreshBlockData() {
         year: 'numeric'
       });
     }
+    
+    if (updateHalvingDate) {
+      const newHalvingTimestamp = halvingData.nextHalvingDate.getTime();
+      if (newHalvingTimestamp !== targetHalvingTimestamp) {
+        targetHalvingTimestamp = newHalvingTimestamp;
+      }
+    }
+    
+    retryCount = 0;
   } catch (error) {
     retryCount++;
     if (retryCount < MAX_RETRIES) {
       const delay = BASE_DELAY * Math.pow(2, retryCount - 1);
       secureLog(`Error refreshing block data, retrying in ${delay}ms (attempt ${retryCount}/${MAX_RETRIES})`, error);
-      setTimeout(() => refreshBlockData(), delay);
+      setTimeout(() => refreshBlockData(updateHalvingDate), delay);
     } else {
       secureLog('Max retries reached for block data refresh', error);
     }
   }
 }
 
-export function initCountdown(initialSeconds: number) {
-  currentTimeRemaining = Math.max(0, initialSeconds);
+export function initCountdown(initialSeconds: number, halvingTimestamp: number) {
+  cleanup();
   
-  if (countdownInterval) {
-    clearInterval(countdownInterval);
-  }
+  targetHalvingTimestamp = halvingTimestamp;
   
+  const currentTimeRemaining = calculateTimeRemaining();
   updateDisplay(currentTimeRemaining);
   
   countdownInterval = window.setInterval(() => {
-    if (currentTimeRemaining > 0) {
-      currentTimeRemaining--;
-      updateDisplay(currentTimeRemaining);
+    const timeRemaining = calculateTimeRemaining();
+    if (timeRemaining > 0) {
+      updateDisplay(timeRemaining);
     } else {
       if (countdownInterval) {
         clearInterval(countdownInterval);
       }
-      refreshBlockData();
+      refreshBlockData(true);
     }
   }, 1000);
   
   blockRefreshInterval = window.setInterval(() => {
-    refreshBlockData().then(() => {
-      const currentBlockText = document.getElementById('current-block')?.textContent?.replace(/,/g, '') || '0';
-      const currentBlock = parseInt(currentBlockText, 10);
-      const halvingData = calculateHalvingData(currentBlock);
-      currentTimeRemaining = halvingData.timeRemaining;
-    });
+    refreshBlockData(true);
   }, BLOCK_REFRESH_INTERVAL);
   
-  refreshBlockData();
+  setTimeout(() => {
+    refreshBlockData(false);
+  }, 2000);
 }
 
 export function cleanup() {
